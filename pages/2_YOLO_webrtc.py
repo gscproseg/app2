@@ -37,7 +37,6 @@ def app():
     st.title("YOLOv5 Object Detection com Streamlit")
 
     webrtc_streamer(key="example", 
-                    video_capture_fps=10,
                     video_frame_callback=video_frame_callback,
                     media_stream_constraints={"video": True, "audio": False},
                     height=600)
