@@ -43,4 +43,7 @@ def app():
                     height=600)
 
 if __name__ == "__main__":
-    app()
+    try:
+        app()
+    except Exception as e:
+        st.error(f"Erro no aplicativo: {str(e)}")
