@@ -11,9 +11,15 @@ yolo = YOLO_Pred(onnx_model='./best.onnx',
 def video_frame_callback(frame):
     try:
         if frame.type == av.VideoFrame.Type.VIDEO_FRAME:
+            st.write("Frame de vídeo recebido.")
             img = frame.to_ndarray(format="bgr24")
+            st.image(img, channels="BGR")
+            
             # Realize operações com a imagem, como a detecção de objetos usando YOLO
             pred_img = yolo.predictions(img)
+            
+            st.image(pred_img, channels="BGR")
+            
             # Retorne o frame processado
             return av.VideoFrame.from_ndarray(pred_img, format="bgr24")
     except Exception as e:
@@ -24,6 +30,7 @@ def video_frame_callback(frame):
 try:
     webrtc_streamer(key="example", 
                     video_frame_callback=video_frame_callback,
-                    media_stream_constraints={"video": True, "audio": False})
+                    media_stream_constraints={"video": True, "audio": False},
+                    debug=True)  # Habilita o modo de depuração
 except Exception as e:
     st.error(f"Erro no aplicativo: {str(e)}")
