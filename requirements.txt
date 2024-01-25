@@ -14,3 +14,4 @@ streamlit-webrtc
 tornado==6.2
 pyOpenSSL
 onnxruntime
+torch
