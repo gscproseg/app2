@@ -1,8 +1,7 @@
 import streamlit as st
-import cv2
 from streamlit_webrtc import webrtc_streamer
+import cv2
 import numpy as np
-import onnx
 import onnxruntime
 
 # Carregue o modelo ONNX
@@ -24,7 +23,8 @@ def video_frame_callback(frame):
             pred = onnx_session.run(None, {'input': input_img})
 
             # Pós-processamento e desenho das bounding boxes (ajuste conforme necessário)
-            # ...
+            # Exemplo: Desenhar um retângulo na posição (100, 100) com largura 200 e altura 100
+            cv2.rectangle(img, (100, 100), (300, 200), (0, 255, 0), 2)
 
             # Retorne o frame processado
             return img  # Substitua pela imagem processada
