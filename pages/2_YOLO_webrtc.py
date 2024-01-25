@@ -1,36 +1,45 @@
 import streamlit as st
+import cv2
 from streamlit_webrtc import webrtc_streamer
-from yolo_predictions import YOLO_Pred
-import av
+import numpy as np
+import onnx
+import onnxruntime
 
-# Crie uma instância de YOLO_Pred
-yolo = YOLO_Pred(onnx_model='./best.onnx',
-                 data_yaml='./data.yaml')
+# Carregue o modelo ONNX
+onnx_model_path = './models/best.onnx'  # Substitua pelo caminho real do seu arquivo ONNX
+onnx_session = onnxruntime.InferenceSession(onnx_model_path)
 
 # Defina uma função de retorno de chamada para processar os frames de vídeo
 def video_frame_callback(frame):
     try:
-        if frame.type == av.VideoFrame.Type.VIDEO_FRAME:
-            st.write("Frame de vídeo recebido.")
+        if frame.type == 'video':
             img = frame.to_ndarray(format="bgr24")
-            st.image(img, channels="BGR")
-            
-            # Realize operações com a imagem, como a detecção de objetos usando YOLO
-            pred_img = yolo.predictions(img)
-            
-            st.image(pred_img, channels="BGR")
-            
+
+            # Pré-processamento da imagem conforme necessário
+            input_img = cv2.resize(img, (640, 640))
+            input_img = input_img.transpose((2, 0, 1)).astype(np.float32)
+            input_img = np.expand_dims(input_img, axis=0)
+
+            # Realize a inferência usando ONNX Runtime
+            pred = onnx_session.run(None, {'input': input_img})
+
+            # Pós-processamento e desenho das bounding boxes (ajuste conforme necessário)
+            # ...
+
             # Retorne o frame processado
-            return av.VideoFrame.from_ndarray(pred_img, format="bgr24")
+            return img  # Substitua pela imagem processada
     except Exception as e:
         st.error(f"Erro no callback de vídeo: {str(e)}")
         return None  # Retorna None para evitar quebras, mas isso pode precisar ser ajustado
 
 # Use o Streamlit Webrtc para exibir a webcam e processar os frames
-try:
+def app():
+    st.title("YOLOv5 Object Detection com Streamlit")
+
     webrtc_streamer(key="example", 
                     video_frame_callback=video_frame_callback,
                     media_stream_constraints={"video": True, "audio": False},
-                    debug=True)  # Habilita o modo de depuração
-except Exception as e:
-    st.error(f"Erro no aplicativo: {str(e)}")
+                    height=600)
+
+if __name__ == "__main__":
+    app()
